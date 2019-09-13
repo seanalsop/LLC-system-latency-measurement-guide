@@ -13,7 +13,7 @@
 
 \tableofcontents
 
-\section{Introduction}
+\section{Introduction} \label{intro}
 
 \subsection{Overview}
 This document serves as a guide to measuring system performance in D‑TACQ Low Latency Control (LLC) systems.
@@ -61,7 +61,7 @@ Our test system used two UUTs, “Local” and “Remote” to simulate a system
 \end{enumerate}
 
 
-\section{Setup and configuration}
+\section{Setup and configuration} \label{setup}
 
 \subsection{System overview}
 \begin{figure}
@@ -115,7 +115,7 @@ set.site 5 clkdiv 1
 soft_trigger
 \end{verbatim}
 
-\section{Enable Latency Instrumentation in FPGA}
+\section{Enable Latency Instrumentation in FPGA} \label{latency_intrumentation}
 There are a number of FPGA registers that can be used to analyse the latency of the LLC system.
 There registers can be used to calculate several statistics on the performance of the system.
 The registers can be accessed from an ssh session on the acq2106 and are located in the DAC site (which is site 5 in the specified configuration).
@@ -124,7 +124,7 @@ To do this run the following command in an ssh session:
 
 \begin{verbatim}/usr/local/CARE/LLC_instrument_latency\end{verbatim}
 
-\section{Setting up the host computer}
+\section{Setting up the host computer} \label{settinguphost}
 The recommended host OS is the latest flavour of CentOS 7 Linux (7.6 or better).
 
 \begin{verbatim}
@@ -180,7 +180,7 @@ Host 'seil' DEVNUM=1 (AFHBA404 A), acq2106_153 ('Remote UUT'), Comms A
 
 If the systems connected are not listed then please consult the driver documentation found in the git repository found in the link above.
 
-\section{Configuring the ACQ2106 UUTs}
+\section{Configuring the ACQ2106 UUTs}\label{configure2106s}
 Once the acq2106 systems have been connected to the host computer they can be configured for LLC operation by using a python script found in the git repo cloned in the last step.
 The script is found in the scripts/ directory.
 It should be used as follows:
@@ -194,7 +194,7 @@ so in our example:
 python ./llc-config-utility.py acq2106_085 acq2106_153
 \end{verbatim}
 
-\section{Host-Side Control Programs}
+\section{Host-Side Control Programs} \label{controlprogs}
 
 \subsection{zcopy}
 
@@ -223,13 +223,13 @@ The \textbf{zcopy} command for the two box system evaluated in this report is as
 
 \begin{verbatim}
 sudo VERBOSE=1 NCHAN=128 AOCHAN=32 DO32=1 SPADLONGS=16 \
-$LLC/afhba-llcontrol-zcopy-remote-ao $NSAM
+LLC/afhba-llcontrol-zcopy-remote-ao $NSAM
 \end{verbatim}
 
 The \textbf{cpucopy} command for the two box system is:
 \begin{verbatim}
 sudo DUP1=96 VERBOSE=1 NCHAN=128 AOCHAN=32 DO32=1 SPADLONGS=16 \
-$LLC/afhba-llcontrol-cpucopy-AIAO-AO $NSAM
+LLC/afhba-llcontrol-cpucopy-AIAO-AO $NSAM
 \end{verbatim}
 
 \subsubsection{Single-Box Operation}
@@ -237,36 +237,36 @@ $LLC/afhba-llcontrol-cpucopy-AIAO-AO $NSAM
 Using the “local UUT” only, the zcopy command would be:
 \begin{verbatim}
 sudo VERBOSE=1 NCHAN=128 AOCHAN=32 DO32=1 SPADLONG S=16 \
-$LLC/afhba-llcontrol-zcopy $NSAM
+LLC/afhba-llcontrol-zcopy $NSAM
 \end{verbatim}
 
 and the cpucopy command would be:
 
 \begin{verbatim}
 sudo DUP1=96 VERBOSE=1 NCHAN=128 AOCHAN=32 DO32=1 SPADLONGS=16 \
-$LLC/afhba-llcontrol-cpucopy $NSAM
+LLC/afhba-llcontrol-cpucopy $NSAM
 \end{verbatim}
 
-\section{Modes of operation}
+\section{Modes of operation} \label{modes}
 
-There are two different delay types (which are covered in far more depth in the D‑TACQ Low Latency White Paper).
-These modes are N and N-1.
+There are two different delay types (which are covered in far more depth in \href{http://www.d-tacq.com/resources/LLC_White_Paper.pdf}{the D-TACQ LLC White Paper}).
+These modes are \textit{\textbf{N}} and \textit{\textbf{N-1}}.
 Which mode is used depends on the circumstances and requirements and in this guide both modes are shown.
 In order to configure a system for the best possible latency measurement N mode is used. To change between N and N-1 modes an OUTPUT\_DELAY parameter is set on the acq2106.
 To configure zcopy for N mode the OUTPUT\_DELAY should be set during an ssh session prior to starting the shot.
-It should be set to approximately 1.326 $\mu$s as shown below.
+It should be set to approximately 1.9 $\mu$s as shown below.
 
 \begin{verbatim}
-set.site 5 OUTPUT\_DELAY 1.326
+set.site 5 OUTPUT\_DELAY 1.9
 \end{verbatim}
 
 Note that the same OUTPUT\_DELAY will not work for cpucopy applications as there is a software overhead.
 For cpucopy an OUTPUT\_DELAY of 4.36 was used (shown later in the guide).
 The OUTPUT\_DELAY used for each specific users case should be approximated, and then tested.
 
-Note also, that this value allows no time for the HOST CPU algorithm see [11]
+Note also, that this value allows no time for the HOST CPU algorithm see section \ref{nmodepcs}.
 
-\section{Starting the LLC capture on acq2106}
+\section{Starting the LLC capture on acq2106} \label{startingcap}
 Once the control program has been started the capture can begin by either transient capture or continuous (streaming) capture.
 This document will cover the streaming data case.
 In order to start a stream, the user can connect to port 4210 using nc(1) as shown:
@@ -285,7 +285,7 @@ The data streamed from the port is directed to /dev/null as a copy is always sto
 Once the stream has started data will start to appear on the host in the directory from which the control program was run.
 Once the number of samples has been reached and the control program stops the stream should be stopped by the user.
 
-\section{Analysing the results}
+\section{Analysing the results} \label{analysis}
 \subsection{zcopy results}
 The data acquired on the host computer can be analysed using the following python script:
 
@@ -317,18 +317,6 @@ From figures \ref{zcopy20hist} and \ref{zcopy50hist} it can be seen that the per
 The average is 4.28 $\mu$s.
 The system performs similarly when operating at 50kHz as when compared to 20kHz. 
 
-\begin{figure}
-	\centering
-	\includegraphics[width=4.0in]{images/50kHz_xeon.png}
-	\caption{Histogram of maximum latency. Clock rate 50kHz. Intel Xeon CPU.}
-	\label{xeon50}
-\end{figure}
-
-Figure \ref{xeon50} is the test from figure \ref{zcopy50hist} repeated on a XEON (multi-processor) system.
-We see that the maximum latency doubles to 12$\mu$s, but more significantly, the number of “slow cycles” is greatly increased.
-We suspect that this is due to a more complex memory architecture on the multiprocessor system (ECC and/or memory shared between multiple processor sockets).
-XEON systems are traditionally preferred for big PCS systems to maximise the number of compute cores, however, for very high clock rates, a desktop class CPU may give better results.
-This is possibly a good application for D‑TACQ “Alternate Target” technology - send the most time-critical data to one box with a simple algorithm running on a uni-processor, send less time-critical data on a slower schedule to the multi-processor box.
 
 \begin{figure}
 	\centering
@@ -343,7 +331,7 @@ The terminal windows show how the OUTPUT\_DELAY is set and the result is observe
 
 \begin{figure}
 	\centering
-	\includegraphics[width=5.0in]{images/50kHz_annotated_scope.png}
+	\includegraphics[width=5.0in]{images/50kHz_annotated_scope_2.png}
 	\caption{A scope trace of two systems at 50kHz showing an approximate overall latency of 7 $\mu$s $\pm$ 1$\mu$s.}
 	\label{zcopy50scope}
 \end{figure}
@@ -389,14 +377,14 @@ It is more illustrative to look at the scope traces for a cpucopy run.
 
 \begin{figure}
 	\centering
-	\includegraphics[width=4.0in]{images/20kHz_annotated_scope_cpucopy.png}
+	\includegraphics[width=4.0in]{images/20kHz_annotated_scope_cpucopy_2.png}
 	\caption{A scope trace of a cpucopy run at 20kHz. Latency is approximately 9 $\mu$s $\pm$ 1$\mu$s.}
 	\label{cpu20scope}
 \end{figure}
 
 \begin{figure}
 	\centering
-	\includegraphics[width=4.0in]{images/50kHz_annotated_scope_cpucopy.png}
+	\includegraphics[width=4.0in]{images/50kHz_annotated_scope_cpucopy_2.png}
 	\caption{A scope trace of a cpucopy run at 50kHz. Latency is approximately  9 $\mu$s $\pm$ 1$\mu$s.}
 	\label{cpu50scope}
 \end{figure}
@@ -411,9 +399,9 @@ The difference in OUTPUT\_DELAY values between cpucopy and zcopy modes is attrib
 This can be estimated from the difference in time between the zcopy OUTPUT\_DELAY and the cpucopy OUTPUT\_DELAY.
 However, using the zcopy OUTPUT\_DELAY would be incorrect.
 We need to compare the time for the full sample to arrive and the OUTPUT\_DELAY used for zcopy above only accounts for the first sites worth of data arriving on the host.
-According to the LLC White Paper, the time for the first site to arrive on the host is 1.326 $\mu$s (as seen above).
+According to the LLC White Paper, the time for the first site to arrive on the host is 1.326$\mu$s (as seen above).
 The time for all of the sites is the number that is required for the correct calculation to be performed.
-This number is 1.326 + (0.14 $\mu$s * number of sites after site 1). Since we are operating with 5 sites (counting the scratch pad as a site).
+This number is 1.326 + (0.14$\mu$s * number of sites after site 1). Since we are operating with 5 sites (counting the scratch pad as a site).
 The full time for all of the data to arrive on the host in zcopy mode should then be:
 \newpage
 
@@ -476,19 +464,29 @@ The difference in times can be accounted for in error reading the scope (instrum
 As can be seen from the tables above the observed latencies are very close to the latencies reported by the registers.
 The uncertainties in the scope measurement have been taken as half of the smallest division ($\pm 1 \mu s$) and so the FPGA measurements are well within margin of error for the observed scope latencies.
 
-\section{Conclusion}
+\section{Conclusion} \label{conc}
 In conclusion there are two reliable methods of measuring latency.
 One method relies on hardware registers to report the hardware latency of the system and the second relies on an oscilloscope independent of the control system.
 These values, when compared, allow insight into how the system works.
 We present a method of automated in-system latency measurement that matches external timing measurement, so it can be used with confidence both for hardware characterisation using zero copy, and for tuning user algorithms with real calculations in \textbf{N-mode}.
 
-\newpage
 
-\section{LLC on an Intel Xeon}
+\section{Appendix: LLC on an Intel Xeon} \label{xeon}
 
+\begin{figure}[!htb]
+	\centering
+	\includegraphics[width=4.0in]{images/50kHz_xeon.png}
+	\caption{Histogram of maximum latency. Clock rate 50kHz. Intel Xeon CPU.}
+	\label{xeon50}
+\end{figure}
 
+Figure \ref{xeon50} is the test from figure \ref{zcopy50hist} repeated on a XEON (multi-processor) system.
+We see that the maximum latency doubles to 12$\mu$s, but more significantly, the number of “slow cycles” is greatly increased.
+We suspect that this is due to a more complex memory architecture on the multiprocessor system (ECC and/or memory shared between multiple processor sockets).
+XEON systems are traditionally preferred for big PCS systems to maximise the number of compute cores, however, for very high clock rates, a desktop class CPU may give better results.
+This is possibly a good application for D‑TACQ “Alternate Target” technology - send the most time-critical data to one box with a simple algorithm running on a uni-processor, send less time-critical data on a slower schedule to the multi-processor box.
 
-\section{Appendix A: Example "N-Mode PCS"}
+\section{Appendix: Example "N-Mode PCS"} \label{nmodepcs}
 
 Setting OUTPUT\_DELAY to the minimum required to achieve \textit{\textbf{N-Mode}} shows the performance of the hardware but leaves no time for any practical control algorithm in the HOST CPU.
 
@@ -517,7 +515,7 @@ Note that the improvement in latency over the N-1 mode is reduced.
 We suggest this means that for 50kHz and above, N-1 mode is best.
 N mode will give increasingly better results as the clock rate is reduced.
 
-\section{Appendix B: SPAD register map}
+\section{Appendix: SPAD register map} \label{spadregmap}
 
 \begin{center}
 	\begin{tabular}{||c c c||} 
@@ -548,7 +546,7 @@ N mode will give increasingly better results as the clock rate is reduced.
 	\item AGENT: FPGA/A9 : timer FPGA reg value updated on 1kHz timer interval. The timer interval can be confirmed by counting the number of duplicate values in a column.
 \end{enumerate}
 
-\section{Appendix C: Firmware Versions}
+\section{Appendix: Firmware Versions} \label{firmware}
 
 Firmware versions used in the test. Later versions should also be good.
 
@@ -591,12 +589,13 @@ time                      : 08:46:18
 bitstream data starts at  : 130
 bitstream data size       : 5979916
 \end{verbatim}
+
 \subsection{AFHBA404}
+
 \begin{verbatim}
 [dt100@seil ~]$ sudo  PROJECTS/AFHBA404/scripts/afhba404-get-ident 
 seil Device d1ac:4104 Device Serial Number af-ba-40-40-11-00-09-0c
 \end{verbatim}
 Final byte is revision code 0x0c, or higher.
-
 
 \end{document}
