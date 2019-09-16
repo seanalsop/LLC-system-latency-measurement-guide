@@ -1,8 +1,10 @@
 \documentclass{article}
 \usepackage{graphicx}
 \usepackage[hidelinks]{hyperref}
+\hypersetup{colorlinks,urlcolor=blue, linkcolor=black}
 \usepackage{url}
 \usepackage{amsmath}
+\usepackage{float}
 
 \begin{document}
 
@@ -16,7 +18,7 @@
 \section{Introduction} \label{intro}
 
 \subsection{Overview}
-This document serves as a guide to measuring system performance in D‑TACQ Low Latency Control (LLC) systems.
+This document serves as a guide to measuring system performance in \mbox{D-TACQ} Low Latency Control (LLC) systems.
 Following this guide will allow users to  measure the hardware performance of their LLC system in two distinct modes of operation.
 The first mode is a purely hardware mode of operation. This is done using a “zcopy” control program.
 This control program is useful for demonstrating the speed of the hardware without any software overhead introduced.
@@ -35,10 +37,10 @@ It is important to note that this report covers only one LLC system configuratio
 Our test system used two UUTs, “Local” and “Remote” to simulate a system where AO data is duplicated at a remote location.
 \subsection{References}
 \begin{enumerate}
-	\item \href{http://www.d-tacq.com/resources/d-tacq-4G-acq4xx-UserGuide-r28.pdf}{The D-TACQ 4G User Guide}
-	\item \href{http://www.d-tacq.com/resources/LLC_White_Paper.pdf}{The D-TACQ LLC White Paper}
-	\item \href{https://github.com/D-TACQ/acq400_hapi}{The D-TACQ acq400\_hapi GitHib repo}
-	\item \href{https://github.com/D-TACQ/AFHBA404}{The D-TACQ AFHBA404 GitHib repo}
+	\item \href{http://www.d-tacq.com/resources/d-tacq-4G-acq4xx-UserGuide-r28.pdf}{The \mbox{D-TACQ} 4G User Guide}
+	\item \href{http://www.d-tacq.com/resources/LLC_White_Paper.pdf}{The \mbox{D-TACQ} LLC White Paper}
+	\item \href{https://github.com/D-TACQ/acq400_hapi}{The \mbox{D-TACQ} acq400\_hapi GitHib repo}
+	\item \href{https://github.com/D-TACQ/AFHBA404}{The \mbox{D-TACQ} AFHBA404 GitHib repo}
 \end{enumerate}
 
 \subsection{Glossary}
@@ -139,7 +141,7 @@ Once the AFHBA404 has been inserted into a CPU PCIe slot (make sure not to choos
 \newline
 \href{https://github.com/D-TACQ/AFHBA404}{https://github.com/D‑TACQ/AFHBA404}
 \newline
-For ease of use D‑TACQ  recommends cloning the above git repository to the following directory:
+For ease of use \mbox{D-TACQ}  recommends cloning the above git repository to the following directory:
 
 \begin{verbatim}
 /home/$USER/PROJECTS/AFHBA404
@@ -207,7 +209,7 @@ The cpucopy program sets separate VI target and VO source buffers, and relies on
 This is more representative of a control system, but requires addition real time setup and interpretation.
 \subsection{Procedure}
 There are four control programs available for use.
-D‑TACQ  recommends starting with the zcopy control programs before moving to the cpucopy control programs.
+\mbox{D-TACQ} recommends starting with the zcopy control programs before moving to the cpucopy control programs.
 There are two versions of each zcopy and cpucopy – one for a single box use case, and another for two systems.
 This guide will be demonstrating the two box case, but if the user only has one system then use the single box control programs.
 There is some user input required during this step if the control programs have not been run before.
@@ -249,11 +251,11 @@ LLC/afhba-llcontrol-cpucopy $NSAM
 
 \section{Modes of operation} \label{modes}
 
-There are two different delay types (which are covered in far more depth in \href{http://www.d-tacq.com/resources/LLC_White_Paper.pdf}{the D-TACQ LLC White Paper}).
+There are two different delay types (which are covered in far more depth in \href{http://www.d-tacq.com/resources/LLC_White_Paper.pdf}{the \mbox{D-TACQ} LLC White Paper}).
 These modes are \textit{\textbf{N}} and \textit{\textbf{N-1}}.
 Which mode is used depends on the circumstances and requirements and in this guide both modes are shown.
-In order to configure a system for the best possible latency measurement N mode is used. To change between N and N-1 modes an OUTPUT\_DELAY parameter is set on the acq2106.
-To configure zcopy for N mode the OUTPUT\_DELAY should be set during an ssh session prior to starting the shot.
+In order to configure a system for the best possible latency measurement \textit{\textbf{N mode}} is used. To change between \textit{\textbf{N and N-1 modes}} an OUTPUT\_DELAY parameter is set on the acq2106.
+To configure zcopy for \textit{\textbf{N mode}} the OUTPUT\_DELAY should be set during an ssh session prior to starting the shot.
 It should be set to approximately 1.9 $\mu$s as shown below.
 
 \begin{verbatim}
@@ -296,150 +298,161 @@ python ./llc_spad_reg_histogram.py acq2106_085
 This script will read the data sitting in the AFHBA404 directory on the host and plot histograms of the data encoded in the spad by the acq2106.
 The following graphs were obtained using the method explained above:
 
-The histograms were sampled a 1kHz, so for a sample rate 20kHz we have one histogram point per 20 ADC samples, and at a sample rate 50kHz we have one histogram point per 50 ADC samples.
-Note that the histogram points are maximum latency per period, so we do not miss any outliers.
+The histograms were sampled at 1kHz, so for a sample rate 20kHz we have one histogram point per 20 ADC samples, and at a sample rate 50kHz we have one histogram point per 50 ADC samples.
+The FPGA takes the maximum of the last 64 samples, so no samples are missed. See section \ref{spadregmap} for detail on the registers available. Note that the histogram points are maximum latency per period, so we do not miss any extreme outliers by averaging latencies.
 
-\begin{figure}
+\subsubsection{zcopy at 20kHz}
+
+\begin{figure} [htb!]
 	\centering
 	\includegraphics[width=4.0in]{images/better_images/20kHz_final_small.png}
-	\caption{Histogram of maximum latency. Clock rate 20kHz. Intel core i7 CPU.}
+	\caption{Histogram of maximum latency in zcopy mode. Clock rate 20kHz. Intel core i7 CPU.}
 	\label{zcopy20hist}
 \end{figure}
 
-\begin{figure}
+
+\begin{figure} [htb!]
 	\centering
-	\includegraphics[width=4.0in]{images/better_images/50kHz_final_small.png}
-	\caption{Histogram of maximum latency. Clock rate 50kHz. Intel core i7 CPU.}
-	\label{zcopy50hist}
-\end{figure}
-
-From figures \ref{zcopy20hist} and \ref{zcopy50hist} it can be seen that the performance of the system in zcopy mode (hence zero software overhead) is very uniform.
-The average is 4.28 $\mu$s.
-The system performs similarly when operating at 50kHz as when compared to 20kHz. 
-
-
-\begin{figure}
-	\centering
-	\includegraphics[width=5.0in]{images/20kHz_annotated_scope.png}
-	\caption{A scope trace taken of two systems “Local”, “Remote” at 20kHz.}
+	\includegraphics[width=4.0in]{images/20kHz_annotated_scope.png}
+	\caption{A scope trace taken of two systems in zcopy mode “Local”, “Remote” at 20kHz.}
 	\label{zcopy20scope}
 \end{figure}
 
-Figure \ref{zcopy20scope} shows end-to-end latency of  approx. 6.2 $\mu$s in N mode. 
-This also illustrates the difference between N mode and N-1 mode.
+From figures \ref{zcopy20hist} and \ref{zcopy20scope} it can be seen that the performance of the system in zcopy mode at 20kHz (hence zero software overhead) is very uniform.
+The average latency is 4.3$\mu$s.
+There is a single outlier sample at 15$\mu$s which can be attributed to the CPU being busy for one ADC clock sample.
+
+Figure \ref{zcopy20scope} shows end-to-end latency of approximately 6$\mu$s $\pm$ 1$\mu$s in N mode.
+Figure \ref{zcopy20scope} also illustrates the difference between N mode and N-1 mode (where adding the correct delay to the fetch results in improved latency).
 The terminal windows show how the OUTPUT\_DELAY is set and the result is observed as the rising edge appearing earlier in N mode.
 
-\begin{figure}
+\subsubsection{zcopy at 50kHz}
+
+\begin{figure} [htb!]
 	\centering
-	\includegraphics[width=5.0in]{images/50kHz_annotated_scope_2.png}
-	\caption{A scope trace of two systems at 50kHz showing an approximate overall latency of 7 $\mu$s $\pm$ 1$\mu$s.}
+	\includegraphics[width=4.0in]{images/better_images/50kHz_final_small.png}
+	\caption{Histogram of maximum latency in zcopy mode. Clock rate 50kHz. Intel core i7 CPU.}
+	\label{zcopy50hist}
+\end{figure}
+
+\begin{figure} [htb!]
+	\centering
+	\includegraphics[width=4.0in]{images/50kHz_annotated_scope_2.png}
+	\caption{A scope trace of two systems at 50kHz (zcopy mode) showing an approximate overall latency of 7 $\mu$s $\pm$ 1$\mu$s.}
 	\label{zcopy50scope}
 \end{figure}
 
-Figures \ref{zcopy20scope} and \ref{zcopy50scope} demonstrate the overall latency of the system measured across the analog signal ports.
+Figures \ref{zcopy50hist} and \ref{zcopy50scope} demonstrate a similar latency result to the system operating at 20kHz.
 Comparing the packet latencies in figures \ref{zcopy20hist} and \ref{zcopy50hist} to the total system latencies of the scope gives some indication of the times involved in the control path.
-From the rising clock edge of the sample clock, to the host, and back to the acq2106 takes approximately 4.3 $\mu$s.
-From the scope trace and the knowledge of OUTPUT\_DELAY we can also determine that the time from rising sample clock edge to that same data packet arriving on the host is 1.326 $\mu$s.
-This is verified by the second system appearing much later in the scope trace (the request for data arrives before the data does on the host), as explained in more depth in the D‑TACQ  LLC White Paper.
+From the rising clock edge of the sample clock, to the host, and back to the acq2106 takes approximately 4.4$\mu$s.
+From the scope trace and the knowledge of OUTPUT\_DELAY we can also determine that the time from rising sample clock edge to that same data packet arriving on the host is 1.9$\mu$s.
+This is verified by the second system appearing much later in the scope trace (the request for data arrives before the data does on the host).
+The stated latency of 1.9$\mu$s is not calculable due to the nature of the zcopy operation. Values are explained in more depth in the \mbox{D-TACQ}  LLC White Paper. \\
 If we perform the following calculation:
 \begin{equation}
 \text{Time measured on scope} - \text{Time measured by FPGA} = \text{Time for DAC to output}
 \end{equation}
-This leaves approximately 2 $\mu$s ($6-4$  $\mu$s) for the DAC to output the packet it receives from the host.
+This leaves approximately 2 $\mu$s ($6-4$  $\mu$s, as in the equation above) for the DAC to output the packet it receives from the host.
+
+\newpage
 
 \subsection{cpucopy results}
-The same process can be undertaken to analyse the data from a cpucopy run. We will again use:
+A similar process can be undertaken to analyse the data from a cpucopy run at 20kHz and 50kHz.
+The same python script can be used to plot the histograms automatically:
 
 \begin{verbatim}
 python ./llc_spad_reg_histogram.py acq2106_085
 \end{verbatim}
 
-\begin{figure}
+\subsubsection{cpucopy at 20kHz}
+
+\begin{figure} [htb!]
 	\centering
 	\includegraphics[width=4.0in]{images/better_images/20k_cpu.png}
 	\caption{A histogram of the FPGA maximum register during a cpucopy run at 20kHz}
 	\label{cpu20hist}
 \end{figure}
 
-\begin{figure}
-	\centering
-	\includegraphics[width=4.0in]{images/better_images/50kHz_cpu.png}
-	\caption{A histogram of the FPGA maximum register during a cpucopy run at 50kHz}
-	\label{cpu50hist}
-\end{figure}
-
-Figures \ref{cpu20hist} and \ref{cpu50hist} look similar to figures \ref{zcopy20hist} and \ref{zcopy50hist} because the FPGA registers are measuring hardware latency.
-This is the latency for the previous packet.
-In figure \ref{cpu20hist} there is a single sample out at the far right of the histogram past 12 $\mu$s.
-This is an example of the CPU missing the sample and not sending a sample to the AO until the next request is received.
-It is more illustrative to look at the scope traces for a cpucopy run.
-
-
-\begin{figure}
+\begin{figure} [htb!]
 	\centering
 	\includegraphics[width=4.0in]{images/20kHz_annotated_scope_cpucopy_2.png}
 	\caption{A scope trace of a cpucopy run at 20kHz. Latency is approximately 9 $\mu$s $\pm$ 1$\mu$s.}
 	\label{cpu20scope}
 \end{figure}
 
-\begin{figure}
+The 20kHz cpucopy histogram (figure \ref{cpu20hist}) looks similar to the zcopy histogram (figure \ref{zcopy20hist}) because the FPGA registers are measuring hardware latency.
+This is the latency for the previous packet.
+
+\subsubsection{cpucopy at 50kHz}
+
+\begin{figure} [htb!]
+	\centering
+	\includegraphics[width=4.0in]{images/better_images/50kHz_cpu.png}
+	\caption{A histogram of the FPGA maximum register during a cpucopy run at 50kHz}
+	\label{cpu50hist}
+\end{figure}
+
+\begin{figure} [htb!]
 	\centering
 	\includegraphics[width=4.0in]{images/50kHz_annotated_scope_cpucopy_2.png}
 	\caption{A scope trace of a cpucopy run at 50kHz. Latency is approximately  9 $\mu$s $\pm$ 1$\mu$s.}
 	\label{cpu50scope}
 \end{figure}
 
+The results for cpucopy at 50kHz are fairly similar to those observed at 20kHz.
+In figure \ref{cpu50hist} there are two samples out at the far right of the histogram past 12$\mu$s.
+This is another example of the CPU missing the sample and not sending the most up to date sample to the AO until the next PCIe request is received.
+It is more illustrative to look at the scope traces for a cpucopy run.
+The scope traces show that the latency is increased by approximately between 2 and 3$\mu$s when operating in the cpucopy mode rather than in zcopy mode.
+This is directly demonstrating the effect of forcing the software to copy the AI data to the AO buffer, as there is very little time spent doing anything else in a cpucopy control loop.
+This is explored in more detail in the next section.
+
+\newpage
 \subsection{Discussion}
 Note that clock speed does not affect hardware latency as detailed in figures \ref{cpu20hist} and \ref{cpu50hist}.
 What does affect the final latency is the time the CPU has to perform a calculation on the data it has before it is available to the analogue outputs.
-A faster clock means that the cpu has less time to perform a calculation as the next sample will be incoming.
+A faster clock means that the CPU has less time to perform a calculation as the next sample will be incoming.
 This is an important concept as it is up to the user to write the control, and hence set the appropriate OUTPUT\_DELAY.
-The OUTPUT\_DELAY determines whether the system is operating in N or N-1 mode.
-The difference in OUTPUT\_DELAY values between cpucopy and zcopy modes is attributed to the time for the cpu to fetch the sample values from RAM.
+The OUTPUT\_DELAY determines whether the system is operating in \textit{\textbf{N or N-1 mode}}.
+The difference in OUTPUT\_DELAY values between cpucopy and zcopy modes is attributed to the time for the CPU to fetch the sample values from RAM.
 This can be estimated from the difference in time between the zcopy OUTPUT\_DELAY and the cpucopy OUTPUT\_DELAY.
-However, using the zcopy OUTPUT\_DELAY would be incorrect.
-We need to compare the time for the full sample to arrive and the OUTPUT\_DELAY used for zcopy above only accounts for the first sites worth of data arriving on the host.
-According to the LLC White Paper, the time for the first site to arrive on the host is 1.326$\mu$s (as seen above).
-The time for all of the sites is the number that is required for the correct calculation to be performed.
-This number is 1.326 + (0.14$\mu$s * number of sites after site 1). Since we are operating with 5 sites (counting the scratch pad as a site).
-The full time for all of the data to arrive on the host in zcopy mode should then be:
-\newpage
-
-\begin{center}
-	(Time for first site to arrive on host)\\
-	+(Time for remaining sites to arrive on host)
-\end{center}
 
 So the RAM access time calculation should be:
 
-\begin{center}
-	(cpucopy OUTPUT\_DELAY) – (FULL zcopy OUTPUT\_DELAY)
-\end{center}
+\begin{equation*}
+	\text{(cpucopy OUTPUT\_DELAY)} - \text{(FULL zcopy OUTPUT\_DELAY)}
+\end{equation*}
+
 or:
+
 \begin{equation*}
 	4.36 - 1.886 = 2.474 \mu s
 \end{equation*}
 
 Compared to Scope:
 
-\begin{center}
-	(cpucopy scope latency at 20kHz) – (zcopy scope latency at 20kHz)
-\end{center}
-or:
 \begin{equation*}
-	9.23 - 6.238 = 2.99 \mu s \text{ (20kHz)}
+\text{(cpucopy scope latency at 20kHz)} - \text{(zcopy scope latency at 20kHz)}
 \end{equation*}
 
-\begin{center}
-	(cpucopy scope latency at 50kHz) – (zcopy scope latency at 50kHz)
-\end{center}
 or:
+
 \begin{equation*}
-9.36 - 6.622 = 2.73 \mu s \text{ (50kHz)}
+	9\pm 1 - 6\pm 1 = 3\pm 2 \mu s \text{ (20kHz)}
 \end{equation*}
 
-The difference in times can be accounted for in error reading the scope (instrument resolution error).
+\begin{equation*}
+\text{(cpucopy scope latency at 50kHz)} - \text{(zcopy scope latency at 50kHz)}
+\end{equation*}
 
+or:
+
+\begin{equation*}
+9\pm 1 - 6\pm 1 = 3\pm 2 \mu s \text{ (50kHz)}
+\end{equation*}
+
+This is including the error reading the scope (instrument resolution error).
+The RAM access time is an important value to understand, as this needs to be performed every iteration of the control loop in order to check that all the data has arrived.
 \subsection{Calculated vs observed latencies}
 
 \begin{center}
@@ -450,13 +463,13 @@ The difference in times can be accounted for in error reading the scope (instrum
 		\hline\hline
 
 		\hline
-		zcopy (20kHz) & 4.28 + 1.886 = \textbf{6.166} & $6 \pm 1$\\
+		zcopy (20kHz) & 4.28 + 1.886 = \textbf{6.166} & \textbf{6 $\pm$ 1}\\
 		\hline
-		zcopy (50kHz) & 4.28 + 1.886 = \textbf{6.166} & $7 \pm 1$\\
+		zcopy (50kHz) & 4.28 + 1.886 = \textbf{6.166} & \textbf{7 $\pm$ 1}\\
 		\hline
-		cpucopy (20kHz) & 4.1 + 4.36 = \textbf{8.46} & $9 \pm 1$\\
+		cpucopy (20kHz) & 4.1 + 4.36 = \textbf{8.46} & \textbf{9 $\pm$ 1}\\
 		\hline
-		cpucopy (50kHz) & 4.1 + 4.36 = \textbf{8.46} & $9 \pm 1$\\ [1ex]
+		cpucopy (50kHz) & 4.1 + 4.36 = \textbf{8.46} & \textbf{9 $\pm$ 1}\\ [1ex]
 		\hline
 	\end{tabular}
 \end{center}
@@ -468,8 +481,7 @@ The uncertainties in the scope measurement have been taken as half of the smalle
 In conclusion there are two reliable methods of measuring latency.
 One method relies on hardware registers to report the hardware latency of the system and the second relies on an oscilloscope independent of the control system.
 These values, when compared, allow insight into how the system works.
-We present a method of automated in-system latency measurement that matches external timing measurement, so it can be used with confidence both for hardware characterisation using zero copy, and for tuning user algorithms with real calculations in \textbf{N-mode}.
-
+We present a method of automated in-system latency measurement that matches external timing measurement, so it can be used with confidence both for hardware characterisation using zero copy, and for tuning user algorithms with real calculations in \textit{\textbf{N-mode}}.
 
 \section{Appendix: LLC on an Intel Xeon} \label{xeon}
 
@@ -484,7 +496,7 @@ Figure \ref{xeon50} is the test from figure \ref{zcopy50hist} repeated on a XEON
 We see that the maximum latency doubles to 12$\mu$s, but more significantly, the number of “slow cycles” is greatly increased.
 We suspect that this is due to a more complex memory architecture on the multiprocessor system (ECC and/or memory shared between multiple processor sockets).
 XEON systems are traditionally preferred for big PCS systems to maximise the number of compute cores, however, for very high clock rates, a desktop class CPU may give better results.
-This is possibly a good application for D‑TACQ “Alternate Target” technology - send the most time-critical data to one box with a simple algorithm running on a uni-processor, send less time-critical data on a slower schedule to the multi-processor box.
+This is possibly a good application for \mbox{D-TACQ} “Alternate Target” technology - send the most time-critical data to one box with a simple algorithm running on a uni-processor, send less time-critical data on a slower schedule to the multi-processor box.
 
 \section{Appendix: Example "N-Mode PCS"} \label{nmodepcs}
 
@@ -500,7 +512,7 @@ Setting OUTPUT\_DELAY to the minimum required to achieve \textit{\textbf{N-Mode}
 Fig \ref{20repscope} shows a system is programmed with a OUTPUT\_DELAY of 10$\mu$s at 20kHz.
 This gives the CPU approximately (10-4.5 = 5.5) $\mu$s to perform the required control algorithm.
 This assumes a very fast output calculation!.
-Note that OUTPUT\_DELAY could be increased to 20, 30 $\mu$s, allowing 15, 25$\mu$s for calculation and still improve on N-1 Mode.
+Note that OUTPUT\_DELAY could be increased to 20, 30 $\mu$s, allowing 15, 25$\mu$s for calculation and still improve on \textit{\textbf{N-1 Mode}}.
 
 
 \begin{figure}
@@ -511,9 +523,9 @@ Note that OUTPUT\_DELAY could be increased to 20, 30 $\mu$s, allowing 15, 25$\mu
 \end{figure}
 
 Figure \ref{50repscope} is a scope trace with the same OUTPUT\_DELAY, 5$\mu$sec processing, but now at 50kHz.
-Note that the improvement in latency over the N-1 mode is reduced.
-We suggest this means that for 50kHz and above, N-1 mode is best.
-N mode will give increasingly better results as the clock rate is reduced.
+Note that the improvement in latency over the \textit{\textbf{N-1 Mode}} is reduced.
+We suggest this means that for 50kHz and above, \textit{\textbf{N-1 Mode}} is best.
+\textit{\textbf{N Mode}} will give increasingly better results as the clock rate is reduced.
 
 \section{Appendix: SPAD register map} \label{spadregmap}
 
