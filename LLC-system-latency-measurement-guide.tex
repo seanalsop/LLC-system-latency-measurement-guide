@@ -5,6 +5,7 @@
 \usepackage{url}
 \usepackage{amsmath}
 \usepackage{float}
+\usepackage[numbered]{bookmark}
 
 \begin{document}
 
@@ -320,7 +321,8 @@ The FPGA takes the maximum of the last 64 samples, so no samples are missed. See
 
 From figures \ref{zcopy20hist} and \ref{zcopy20scope} it can be seen that the performance of the system in zcopy mode at 20kHz (hence zero software overhead) is very uniform.
 The average latency is 4.3$\mu$s.
-There is a single outlier sample at 15$\mu$s which can be attributed to the CPU being busy for one ADC clock sample.
+There is a single outlier sample at 15$\mu$s which means that access to RAM must have been blocked for 15$\mu$s.
+Since this was observed during a zcopy run this is not a timeslice effect.
 
 Figure \ref{zcopy20scope} shows end-to-end latency of approximately 6$\mu$s $\pm$ 1$\mu$s in N mode.
 Figure \ref{zcopy20scope} also illustrates the difference between N mode and N-1 mode (where adding the correct delay to the fetch results in improved latency).
@@ -463,13 +465,13 @@ The RAM access time is an important value to understand, as this needs to be per
 		\hline\hline
 
 		\hline
-		zcopy (20kHz) & 4.28 + 1.886 = \textbf{6.166} & \textbf{6 $\pm$ 1}\\
+		zcopy (20kHz) & 4.3 + 1.9 = \textbf{6.2} & \textbf{6 $\pm$ 1}\\
 		\hline
-		zcopy (50kHz) & 4.28 + 1.886 = \textbf{6.166} & \textbf{7 $\pm$ 1}\\
+		zcopy (50kHz) & 4.3 + 1.9 = \textbf{6.2} & \textbf{7 $\pm$ 1}\\
 		\hline
-		cpucopy (20kHz) & 4.1 + 4.36 = \textbf{8.46} & \textbf{9 $\pm$ 1}\\
+		cpucopy (20kHz) & 4.1 + 4.4 = \textbf{8.5} & \textbf{9 $\pm$ 1}\\
 		\hline
-		cpucopy (50kHz) & 4.1 + 4.36 = \textbf{8.46} & \textbf{9 $\pm$ 1}\\ [1ex]
+		cpucopy (50kHz) & 4.1 + 4.4 = \textbf{8.5} & \textbf{9 $\pm$ 1}\\ [1ex]
 		\hline
 	\end{tabular}
 \end{center}
@@ -483,7 +485,9 @@ One method relies on hardware registers to report the hardware latency of the sy
 These values, when compared, allow insight into how the system works.
 We present a method of automated in-system latency measurement that matches external timing measurement, so it can be used with confidence both for hardware characterisation using zero copy, and for tuning user algorithms with real calculations in \textit{\textbf{N-mode}}.
 
-\section{Appendix: LLC on an Intel Xeon} \label{xeon}
+\newpage
+
+\section{Appendix A: LLC on an Intel Xeon} \label{xeon}
 
 \begin{figure}[!htb]
 	\centering
@@ -498,24 +502,27 @@ We suspect that this is due to a more complex memory architecture on the multipr
 XEON systems are traditionally preferred for big PCS systems to maximise the number of compute cores, however, for very high clock rates, a desktop class CPU may give better results.
 This is possibly a good application for \mbox{D-TACQ} “Alternate Target” technology - send the most time-critical data to one box with a simple algorithm running on a uni-processor, send less time-critical data on a slower schedule to the multi-processor box.
 
-\section{Appendix: Example "N-Mode PCS"} \label{nmodepcs}
+\newpage
+
+\section{Appendix B: Example "N-Mode PCS"} \label{nmodepcs}
 
 Setting OUTPUT\_DELAY to the minimum required to achieve \textit{\textbf{N-Mode}} shows the performance of the hardware but leaves no time for any practical control algorithm in the HOST CPU.
 
-\begin{figure}
-	\centering
-	\includegraphics[width=4.0in]{images/n-mode-pcs-scope-trace-20kHz-2.png}
-	\caption{An example PCS system with a more representative OUTPUT\_DELAY of 10$\mu$s at 20kHz.}
-	\label{20repscope}
-\end{figure}
+
 
 Fig \ref{20repscope} shows a system is programmed with a OUTPUT\_DELAY of 10$\mu$s at 20kHz.
 This gives the CPU approximately (10-4.5 = 5.5) $\mu$s to perform the required control algorithm.
 This assumes a very fast output calculation!.
 Note that OUTPUT\_DELAY could be increased to 20, 30 $\mu$s, allowing 15, 25$\mu$s for calculation and still improve on \textit{\textbf{N-1 Mode}}.
 
+\begin{figure} [htb!]
+	\centering
+	\includegraphics[width=4.0in]{images/n-mode-pcs-scope-trace-20kHz-2.png}
+	\caption{An example PCS system with a more representative OUTPUT\_DELAY of 10$\mu$s at 20kHz.}
+	\label{20repscope}
+\end{figure}
 
-\begin{figure}
+\begin{figure} [htb!]
 	\centering
 	\includegraphics[width=4.0in]{images/n-mode-pcs-scope-trace-50kHz-2.png}
 	\caption{An example PCS system with a more representative OUTPUT\_DELAY of 10$\mu$s at 50kHz.}
@@ -527,7 +534,9 @@ Note that the improvement in latency over the \textit{\textbf{N-1 Mode}} is redu
 We suggest this means that for 50kHz and above, \textit{\textbf{N-1 Mode}} is best.
 \textit{\textbf{N Mode}} will give increasingly better results as the clock rate is reduced.
 
-\section{Appendix: SPAD register map} \label{spadregmap}
+\newpage
+
+\section{Appendix C: SPAD register map} \label{spadregmap}
 
 \begin{center}
 	\begin{tabular}{||c c c||} 
@@ -558,7 +567,9 @@ We suggest this means that for 50kHz and above, \textit{\textbf{N-1 Mode}} is be
 	\item AGENT: FPGA/A9 : timer FPGA reg value updated on 1kHz timer interval. The timer interval can be confirmed by counting the number of duplicate values in a column.
 \end{enumerate}
 
-\section{Appendix: Firmware Versions} \label{firmware}
+\newpage
+
+\section{Appendix D: Firmware Versions} \label{firmware}
 
 Firmware versions used in the test. Later versions should also be good.
 
